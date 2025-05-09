@@ -2,7 +2,20 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, set up the environment variables:
+
+1. Create a `.env.local` file in the root directory
+2. Add the following variables with your Appwrite configuration:
+
+```
+NEXT_PUBLIC_APPWRITE_ENDPOINT=your-appwrite-endpoint
+NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_APPWRITE_DATABASE_ID=your-database-id
+NEXT_PUBLIC_APPWRITE_SERVERS_COLLECTION_ID=your-servers-collection-id
+NEXT_PUBLIC_APPWRITE_APPLICATIONS_COLLECTION_ID=your-applications-collection-id
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -29,8 +42,24 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Appwrite Integration
+
+This application uses Appwrite as a backend service to store server and application data. The integration provides:
+
+- Persistent data storage (replaces localStorage)
+- Data synchronization across devices
+- Backend security and data validation
+- Scalable database operations
+
+For detailed setup instructions, see [APPWRITE_SETUP.md](./APPWRITE_SETUP.md).
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+When deploying to Vercel, make sure to:
+
+1. Add all the required environment variables in your Vercel project settings
+2. Configure CORS in your Appwrite project to allow your Vercel domain
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
