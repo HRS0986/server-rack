@@ -18,6 +18,11 @@ export default function HomeContent() {
   const [isAddingServer, setIsAddingServer] = useState(false);
   const router = useRouter();
 
+  // For debugging
+  useEffect(() => {
+    console.log('HomeContent rendered with servers:', servers);
+  }, [servers]);
+
   // Check if this is the first visit
   useEffect(() => {
     const isFirstVisit = localStorage.getItem('firstVisit') !== 'false';

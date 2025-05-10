@@ -140,9 +140,7 @@ export const appwriteService = {
             console.log('Error updating password:', error);
             throw error;
         }
-    },
-
-    // Server methods
+    },    // Server methods
     getServers: async () => {
         try {
             const response = await databases.listDocuments(
@@ -159,11 +157,13 @@ export const appwriteService = {
                         name: server.name,
                         ipAddress: server.ipAddress,
                         dns: server.dns || '',
+                        userId: server.userId || '', // Include userId for permission checks
                         applications: apps
                     };
                 })
             );
             
+            console.log('Processed servers with userId:', serversWithApps);
             return serversWithApps;
         } catch (error) {
             console.log('Error fetching servers:', error);
@@ -192,10 +192,12 @@ export const appwriteService = {
             console.log('Error fetching server:', error);
             throw error;
         }
-    },
-
-    addServer: async (serverData) => {
+    },    addServer: async (serverData) => {
         try {
+            const currentUser = await appwriteService.getCurrentUser();
+            const userId = currentUser ? currentUser.$id : '';
+            
+            // Create document with only the fields defined in the Appwrite collection schema
             const response = await databases.createDocument(
                 DATABASE_ID,
                 SERVERS_COLLECTION_ID,
@@ -204,14 +206,17 @@ export const appwriteService = {
                     name: serverData.name,
                     ipAddress: serverData.ipAddress,
                     dns: serverData.dns || ''
+                    // userId field is not defined in the collection schema
                 }
             );
-            
-            return {
+              return {
                 id: response.$id,
                 name: response.name,
                 ipAddress: response.ipAddress,
                 dns: response.dns || '',
+                // Store userId in state but don't save it in Appwrite
+                // This is a client-side only property
+                userId: userId,
                 applications: []
             };
         } catch (error) {

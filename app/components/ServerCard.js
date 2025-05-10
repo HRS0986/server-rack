@@ -21,7 +21,16 @@ export default function ServerCard({ server }) {
   // Prevent hydration issues
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    // Debug output
+    console.log('ServerCard mounting for server:', server);
+  }, [server]);
+
+  // Debug when server data changes
+  useEffect(() => {
+    if (isMounted) {
+      console.log('Server data in mounted component:', server);
+    }
+  }, [server, isMounted]);
 
   if (!isMounted) {
     return null;
@@ -41,7 +50,8 @@ export default function ServerCard({ server }) {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-md p-5 border border-gray-700" suppressHydrationWarning>      <div className="flex justify-between items-start mb-4">
+    <div className="bg-gray-800 rounded-lg shadow-md p-5 border border-gray-700" suppressHydrationWarning>
+      <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-bold text-gray-100">{server.name}</h3>
         <div className="flex space-x-2">
           {canEditServer(server) && (
