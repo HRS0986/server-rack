@@ -14,13 +14,13 @@ const APPLICATIONS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_APPLICATIONS
 
 // Validate configuration
 if (!appwriteEndpoint || !appwriteProjectId || !DATABASE_ID || !SERVERS_COLLECTION_ID || !APPLICATIONS_COLLECTION_ID) {
-  console.error('Appwrite configuration is incomplete. Please check your .env.local file.');
+  console.log('Appwrite configuration is incomplete. Please check your .env.local file.');
   
-  if (!appwriteEndpoint) console.error('Missing NEXT_PUBLIC_APPWRITE_ENDPOINT');
-  if (!appwriteProjectId) console.error('Missing NEXT_PUBLIC_APPWRITE_PROJECT_ID');
-  if (!DATABASE_ID) console.error('Missing NEXT_PUBLIC_APPWRITE_DATABASE_ID');
-  if (!SERVERS_COLLECTION_ID) console.error('Missing NEXT_PUBLIC_APPWRITE_SERVERS_COLLECTION_ID');
-  if (!APPLICATIONS_COLLECTION_ID) console.error('Missing NEXT_PUBLIC_APPWRITE_APPLICATIONS_COLLECTION_ID');
+  if (!appwriteEndpoint) console.log('Missing NEXT_PUBLIC_APPWRITE_ENDPOINT');
+  if (!appwriteProjectId) console.log('Missing NEXT_PUBLIC_APPWRITE_PROJECT_ID');
+  if (!DATABASE_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_DATABASE_ID');
+  if (!SERVERS_COLLECTION_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_SERVERS_COLLECTION_ID');
+  if (!APPLICATIONS_COLLECTION_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_APPLICATIONS_COLLECTION_ID');
 }
 
 // Configure the client
@@ -36,13 +36,109 @@ const databases = new Databases(client);
  * Appwrite service utility for server-rack application
  */
 export const appwriteService = {
-    // Account methods
+    // Authentication methods
+    createAccount: async (email, password, name) => {
+        try {
+            const newAccount = await account.create(
+                ID.unique(),
+                email,
+                password,
+                name
+            );
+            
+            if (newAccount) {
+                // Log in the user immediately after account creation
+                return await appwriteService.login(email, password);
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.log('Error creating account:', error);
+            throw error;
+        }
+    },
+    
+    login: async (email, password) => {
+        try {
+            await account.createEmailPasswordSession(email, password);
+            return await appwriteService.getCurrentUser();
+        } catch (error) {
+            console.log('Error during login:', error);
+            throw error;
+        }
+    },
+    
+    logout: async () => {
+        try {
+            await account.deleteSession('current');
+            return true;
+        } catch (error) {
+            console.log('Error during logout:', error);
+            throw error;
+        }
+    },
+    
     getCurrentUser: async () => {
         try {
-            return await account.get();
+            const user = await account.get();
+            return user;
         } catch (error) {
-            console.error('Error getting current user:', error);
+            console.log('Error getting current user:', error);
             return null;
+        }
+    },
+    
+    forgotPassword: async (email) => {
+        try {
+            await account.createRecovery(email, `${window.location.origin}/reset-password`);
+            return true;
+        } catch (error) {
+            console.log('Error during password recovery:', error);
+            throw error;
+        }
+    },
+    
+    resetPassword: async (userId, secret, password, confirmPassword) => {
+        if (password !== confirmPassword) {
+            throw new Error('Passwords do not match');
+        }
+        
+        try {
+            await account.updateRecovery(userId, secret, password, confirmPassword);
+            return true;
+        } catch (error) {
+            console.log('Error resetting password:', error);
+            throw error;
+        }
+    },
+    
+    updateName: async (name) => {
+        try {
+            await account.updateName(name);
+            return await appwriteService.getCurrentUser();
+        } catch (error) {
+            console.log('Error updating name:', error);
+            throw error;
+        }
+    },
+    
+    updateEmail: async (email, password) => {
+        try {
+            await account.updateEmail(email, password);
+            return await appwriteService.getCurrentUser();
+        } catch (error) {
+            console.log('Error updating email:', error);
+            throw error;
+        }
+    },
+    
+    updatePassword: async (oldPassword, newPassword) => {
+        try {
+            await account.updatePassword(newPassword, oldPassword);
+            return true;
+        } catch (error) {
+            console.log('Error updating password:', error);
+            throw error;
         }
     },
 
@@ -70,7 +166,7 @@ export const appwriteService = {
             
             return serversWithApps;
         } catch (error) {
-            console.error('Error fetching servers:', error);
+            console.log('Error fetching servers:', error);
             return [];
         }
     },
@@ -93,7 +189,7 @@ export const appwriteService = {
                 applications
             };
         } catch (error) {
-            console.error('Error fetching server:', error);
+            console.log('Error fetching server:', error);
             throw error;
         }
     },
@@ -119,7 +215,7 @@ export const appwriteService = {
                 applications: []
             };
         } catch (error) {
-            console.error('Error adding server:', error);
+            console.log('Error adding server:', error);
             throw error;
         }
     },
@@ -144,7 +240,7 @@ export const appwriteService = {
                 dns: response.dns || ''
             };
         } catch (error) {
-            console.error('Error updating server:', error);
+            console.log('Error updating server:', error);
             throw error;
         }
     },
@@ -167,7 +263,7 @@ export const appwriteService = {
             
             return true;
         } catch (error) {
-            console.error('Error deleting server:', error);
+            console.log('Error deleting server:', error);
             throw error;
         }
     },
@@ -191,7 +287,7 @@ export const appwriteService = {
                 serverId: app.serverId
             }));
         } catch (error) {
-            console.error('Error fetching applications:', error);
+            console.log('Error fetching applications:', error);
             return [];
         }
     },
@@ -218,7 +314,7 @@ export const appwriteService = {
                 serverId: response.serverId
             };
         } catch (error) {
-            console.error('Error adding application:', error);
+            console.log('Error adding application:', error);
             throw error;
         }
     },
@@ -245,7 +341,7 @@ export const appwriteService = {
                 serverId: response.serverId
             };
         } catch (error) {
-            console.error('Error updating application:', error);
+            console.log('Error updating application:', error);
             throw error;
         }
     },
@@ -260,10 +356,24 @@ export const appwriteService = {
             
             return true;
         } catch (error) {
-            console.error('Error deleting application:', error);
+            console.log('Error deleting application:', error);
             throw error;
         }
-    }
+    },
+
+    // User role management
+    hasRole: (user, role) => {
+        if (!user || !user.labels) return false;
+        return user.labels.includes(role);
+    },
+    
+    isAdmin: (user) => {
+        return appwriteService.hasRole(user, 'admin');
+    },
+    
+    // Note: To update user roles, you would need a server-side function 
+    // as client-side code can't update user labels directly in Appwrite
+    // This would be implemented with Appwrite Functions
 };
 
 export default client;

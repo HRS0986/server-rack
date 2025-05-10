@@ -9,7 +9,8 @@ import ServerEditForm from './ServerEditForm';
 import ApplicationEditForm from './ApplicationEditForm';
 import LoadingSpinner from './LoadingSpinner';
 
-export default function ServerCard({ server }) {  const { deleteServer, isLoading } = useServerContext();
+export default function ServerCard({ server }) {  
+  const { deleteServer, isLoading, canEditServer, canDeleteServer } = useServerContext();
   const [isAddingApp, setIsAddingApp] = useState(false);
   const [isEditingServer, setIsEditingServer] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
@@ -40,25 +41,28 @@ export default function ServerCard({ server }) {  const { deleteServer, isLoadin
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-md p-5 border border-gray-700" suppressHydrationWarning>
-      <div className="flex justify-between items-start mb-4">
+    <div className="bg-gray-800 rounded-lg shadow-md p-5 border border-gray-700" suppressHydrationWarning>      <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-bold text-gray-100">{server.name}</h3>
-        <div className="flex space-x-2">          <Button 
-            variant="secondary" 
-            className="px-2 py-1 text-sm"
-            onClick={() => setIsEditingServer(true)}
-            disabled={isLoading}
-          >
-            Edit
-          </Button>
-          <Button 
-            variant="danger" 
-            className="px-2 py-1 text-sm"
-            onClick={() => setShowConfirmDelete(true)}
-            disabled={isLoading}
-          >
-            Delete
-          </Button>
+        <div className="flex space-x-2">
+          {canEditServer(server) && (
+            <Button 
+              variant="secondary" 
+              className="px-2 py-1 text-sm"
+              onClick={() => setIsEditingServer(true)}
+              disabled={isLoading}            >
+              Edit
+            </Button>
+          )}
+          {canDeleteServer(server) && (
+            <Button 
+              variant="danger" 
+              className="px-2 py-1 text-sm"
+              onClick={() => setShowConfirmDelete(true)}
+              disabled={isLoading}
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
       

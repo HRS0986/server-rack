@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { ServerProvider } from "./context/ServerContext";
+import { AuthProvider } from "./context/AuthContext";
 import "./globals.css";
 import "./darkTheme.css";
 
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Server Rack Manager",
+  title: "Server Rack",
   description: "Manage servers, applications, and ports",
 };
 
@@ -25,9 +26,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900 text-gray-100`}
         suppressHydrationWarning
       >
-        <ServerProvider>
-          {children}
-        </ServerProvider>
+        <AuthProvider>
+          <ServerProvider>
+            {children}
+          </ServerProvider>
+        </AuthProvider>
       </body>
     </html>
   );

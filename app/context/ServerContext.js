@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { appwriteService } from '../utils/appwrite';
+import { permissionsService } from '../utils/permissions';
+import { useAuth } from './AuthContext';
 
 // Context for managing server and application data
 const ServerContext = createContext(undefined);
@@ -12,6 +14,9 @@ export function ServerProvider({ children }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Get current user from auth context
+  const { user } = useAuth();
 
   // Load data from Appwrite on component mount
   useEffect(() => {
@@ -22,8 +27,9 @@ export function ServerProvider({ children }) {
         const serverData = await appwriteService.getServers();
         setServers(serverData);
         setIsLoaded(true);
+        console.log('Fetched servers:', serverData);
       } catch (err) {
-        console.error('Error fetching servers:', err);
+        console.log('Error fetching servers:', err);
         setError('Failed to load servers. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -42,7 +48,7 @@ export function ServerProvider({ children }) {
       setServers(prev => [...prev, newServer]);
       return newServer.id;
     } catch (err) {
-      console.error('Error adding server:', err);
+      console.log('Error adding server:', err);
       setError('Failed to add server. Please try again later.');
       throw err;
     } finally {
@@ -64,7 +70,7 @@ export function ServerProvider({ children }) {
         )
       );
     } catch (err) {
-      console.error('Error updating server:', err);
+      console.log('Error updating server:', err);
       setError('Failed to update server. Please try again later.');
       throw err;
     } finally {
@@ -80,7 +86,7 @@ export function ServerProvider({ children }) {
       await appwriteService.deleteServer(id);
       setServers(prev => prev.filter(server => server.id !== id));
     } catch (err) {
-      console.error('Error deleting server:', err);
+      console.log('Error deleting server:', err);
       setError('Failed to delete server. Please try again later.');
       throw err;
     } finally {
@@ -108,7 +114,7 @@ export function ServerProvider({ children }) {
       
       return newApp.id;
     } catch (err) {
-      console.error('Error adding application:', err);
+      console.log('Error adding application:', err);
       setError('Failed to add application. Please try again later.');
       throw err;
     } finally {
@@ -138,7 +144,7 @@ export function ServerProvider({ children }) {
         )
       );
     } catch (err) {
-      console.error('Error updating application:', err);
+      console.log('Error updating application:', err);
       setError('Failed to update application. Please try again later.');
       throw err;
     } finally {
@@ -164,7 +170,7 @@ export function ServerProvider({ children }) {
         )
       );
     } catch (err) {
-      console.error('Error deleting application:', err);
+      console.log('Error deleting application:', err);
       setError('Failed to delete application. Please try again later.');
       throw err;
     } finally {
@@ -172,18 +178,33 @@ export function ServerProvider({ children }) {
     }
   };
 
+  // Access control methods
+  const canEditServer = (server) => {
+    return permissionsService.canAccess(user, server, 'update');
+  };
+
+  const canDeleteServer = (server) => {
+    return permissionsService.canAccess(user, server, 'delete');
+  };
+
+  const filterAccessibleServers = () => {
+    return permissionsService.filterAccessibleResources(user, servers);
+  };
+
   // Context value
   const value = {
-    servers,
+    servers: user ? filterAccessibleServers() : [],
+    isLoaded,
+    isLoading,
+    error,
     addServer,
     updateServer,
     deleteServer,
     addApplication,
     updateApplication,
     deleteApplication,
-    isLoaded,
-    isLoading,
-    error
+    canEditServer,
+    canDeleteServer,
   };
   return (
     <ServerContext.Provider value={value}>
