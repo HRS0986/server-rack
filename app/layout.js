@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { ServerProvider } from "./context/ServerContext";
 import { AuthProvider } from "./context/AuthContext";
+import { Suspense } from 'react'
 import "./globals.css";
 import "./darkTheme.css";
 
@@ -28,7 +29,9 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <ServerProvider>
-            {children}
+            <Suspense>
+              {children}
+            </Suspense>
           </ServerProvider>
         </AuthProvider>
       </body>

@@ -19,7 +19,7 @@ export default function UnauthorizedPage() {
         <h1 className="text-3xl font-bold mb-4 text-gray-100">Access Denied</h1>
         
         <p className="text-gray-300 mb-8">
-          You don't have permission to access this page. Please log in or register to continue.
+          You do not have permission to access this page. Please log in or register to continue.
         </p>
         
         <div className="flex flex-col sm:flex-row justify-center gap-4">

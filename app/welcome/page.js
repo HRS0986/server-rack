@@ -26,21 +26,21 @@ export default function WelcomePage() {
               <div className="bg-gray-700 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-100 mb-2">Step 1: Create an Appwrite Account</h3>
                 <p className="text-gray-300 mb-2">
-                  Visit <a href="https://appwrite.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Appwrite.io</a> and create an account if you don't have one already.
+                  Visit <a href="https://appwrite.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Appwrite.io</a> and create an account if you do not have one already.
                 </p>
               </div>
               
               <div className="bg-gray-700 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-100 mb-2">Step 2: Create a New Project</h3>
                 <p className="text-gray-300 mb-2">
-                  After logging in, create a new project named "Server Rack".
+                  After logging in, create a new project named Server Rack.
                 </p>
               </div>
               
               <div className="bg-gray-700 p-4 rounded-lg">
                 <h3 className="font-medium text-gray-100 mb-2">Step 3: Set Up Authentication</h3>
                 <p className="text-gray-300 mb-2">
-                  Go to the "Auth" section and configure email/password authentication.
+                  Go to the Auth section and configure email/password authentication.
                 </p>
               </div>
               
@@ -77,7 +77,7 @@ export default function WelcomePage() {
           <div className="border-t border-gray-700 pt-6">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">Next Steps</h2>
             <p className="text-gray-300 mb-4">
-              Once you've set up your Appwrite account, you can:
+              Once you have set up your Appwrite account, you can:
             </p>
             
             <ul className="list-disc pl-5 text-gray-300 space-y-2 mb-6">

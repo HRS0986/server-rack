@@ -185,7 +185,7 @@ export default function ServerCard({ server }) {
           )}
           
           <p className="mb-4 text-gray-200">
-            Are you sure you want to delete "{server.name}"?
+            Are you sure you want to delete {server.name}?
             This will also delete all applications associated with this server.
           </p>
           <div className="flex justify-end space-x-3">

@@ -101,7 +101,7 @@ export default function ApplicationEditForm({ serverId, app, onClose }) {
       {confirmDelete ? (
         <div>
           <p className="text-gray-200 mb-4">
-            Are you sure you want to delete the application "{app.name}"?
+            Are you sure you want to delete the application {app.name}?
           </p>
           <div className="flex justify-end space-x-3">
             <Button 

@@ -214,7 +214,7 @@ export const appwriteService = {
                 name: response.name,
                 ipAddress: response.ipAddress,
                 dns: response.dns || '',
-                // Store userId in state but don't save it in Appwrite
+                // Store userId in state but do not save it in Appwrite
                 // This is a client-side only property
                 userId: userId,
                 applications: []
@@ -334,7 +334,7 @@ export const appwriteService = {
                     name: appData.name,
                     port: appData.port,
                     description: appData.description || ''
-                    // We don't update serverId as the application remains with the same server
+                    // We do not update serverId as the application remains with the same server
                 }
             );
             

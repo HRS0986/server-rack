@@ -6,7 +6,7 @@ import { appwriteService } from '../utils/appwrite';
 
 const AuthContext = createContext(undefined);
 
-// List of routes that don't require authentication
+// List of routes that do not require authentication
 const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/welcome', '/unauthorized'];
 
 export function AuthProvider({ children }) {
