@@ -87,7 +87,14 @@ export default function ServerCard({ server }) {
             <span className="font-mono text-gray-100">{server.dns}</span>
           </div>
         )}
-      </div>        <div className="mb-4">
+        {server.username && (
+          <div className="text-sm">
+            <span className="font-medium text-gray-300">Username: </span>
+            <span className="font-mono text-gray-100">{server.username}</span>
+          </div>
+        )}
+      </div>
+      <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-md font-semibold text-gray-200">Applications</h4>          <Button 
             className="px-3 py-1 text-sm"

@@ -186,6 +186,7 @@ export const appwriteService = {
                 name: server.name,
                 ipAddress: server.ipAddress,
                 dns: server.dns || '',
+                username: server.username || '',
                 applications
             };
         } catch (error) {
@@ -201,19 +202,19 @@ export const appwriteService = {
             const response = await databases.createDocument(
                 DATABASE_ID,
                 SERVERS_COLLECTION_ID,
-                ID.unique(),
-                {
+                ID.unique(),                {
                     name: serverData.name,
                     ipAddress: serverData.ipAddress,
-                    dns: serverData.dns || ''
+                    dns: serverData.dns || '',
+                    username: serverData.username || ''
                     // userId field is not defined in the collection schema
                 }
             );
-              return {
-                id: response.$id,
+              return {                id: response.$id,
                 name: response.name,
                 ipAddress: response.ipAddress,
                 dns: response.dns || '',
+                username: response.username || '',
                 // Store userId in state but do not save it in Appwrite
                 // This is a client-side only property
                 userId: userId,
@@ -230,19 +231,19 @@ export const appwriteService = {
             const response = await databases.updateDocument(
                 DATABASE_ID,
                 SERVERS_COLLECTION_ID,
-                id,
-                {
+                id,                {
                     name: serverData.name,
                     ipAddress: serverData.ipAddress,
-                    dns: serverData.dns || ''
+                    dns: serverData.dns || '',
+                    username: serverData.username || ''
                 }
             );
-            
-            return {
+              return {
                 id: response.$id,
                 name: response.name,
                 ipAddress: response.ipAddress,
-                dns: response.dns || ''
+                dns: response.dns || '',
+                username: response.username || ''
             };
         } catch (error) {
             console.log('Error updating server:', error);

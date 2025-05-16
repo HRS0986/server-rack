@@ -27,7 +27,18 @@ export function ServerProvider({ children }) {
         // Add validation check
         if (Array.isArray(serverData)) {
           console.log('Fetched servers:', serverData);
-          setServers(serverData);
+          setServers(serverData.map(server => {
+            const apps = server.applications || [];
+            return {
+              id: server.$id,
+              name: server.name,
+              ipAddress: server.ipAddress,
+              dns: server.dns || '',
+              username: server.username || '',
+              userId: server.userId || '', // Include userId for permission checks
+              applications: apps
+            };
+          }));
         } else {
           console.error('Error: serverData is not an array:', serverData);
           setServers([]);

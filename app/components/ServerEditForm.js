@@ -11,6 +11,7 @@ export default function ServerEditForm({ server, onClose }) {
     name: server.name,
     ipAddress: server.ipAddress,
     dns: server.dns || '',
+    username: server.username || '',
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
@@ -45,6 +46,10 @@ export default function ServerEditForm({ server, onClose }) {
     
     if (!formData.name.trim()) {
       newErrors.name = 'Server name is required';
+    }
+    
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
     }
     
     if (!formData.ipAddress.trim()) {
@@ -117,6 +122,17 @@ export default function ServerEditForm({ server, onClose }) {
           onChange={handleChange}
           error={errors.dns}
           placeholder="server.example.com"
+          disabled={isLoading}
+        />
+        
+        <Input
+          label="Username"
+          id="username"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          error={errors.username}
+          placeholder="root"
           disabled={isLoading}
         />
         
