@@ -47,7 +47,7 @@ export default function HomeContent() {
           <>            {servers.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {servers.map(server => (
-                  <ServerCard key={server.id} server={server} />
+                  <ServerCard key={server.ipAddress} server={server} />
                 ))}
                 
                 {/* Add Server Card */}

@@ -28,9 +28,11 @@ export function ServerProvider({ children }) {
         if (Array.isArray(serverData)) {
           console.log('Fetched servers:', serverData);
           setServers(serverData.map(server => {
+            console.log('Processing server:', server);
+            
             const apps = server.applications || [];
             return {
-              id: server.$id,
+              id: server.id,
               name: server.name,
               ipAddress: server.ipAddress,
               dns: server.dns || '',

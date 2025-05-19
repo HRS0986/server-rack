@@ -8,15 +8,18 @@ import ApplicationForm from './ApplicationForm';
 import ServerEditForm from './ServerEditForm';
 import ApplicationEditForm from './ApplicationEditForm';
 import LoadingSpinner from './LoadingSpinner';
+import toast from 'react-hot-toast';
 
-export default function ServerCard({ server }) {  
-  const { deleteServer, isLoading, canEditServer, canDeleteServer } = useServerContext();
+export default function ServerCard({ server }) {    const { deleteServer, isLoading, canEditServer, canDeleteServer } = useServerContext();
   const [isAddingApp, setIsAddingApp] = useState(false);
   const [isEditingServer, setIsEditingServer] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [copiedSSH, setCopiedSSH] = useState(false);
+  const [copiedAppId, setCopiedAppId] = useState(null);
+  
   
   // Prevent hydration issues
   useEffect(() => {
@@ -45,10 +48,35 @@ export default function ServerCard({ server }) {
     }
   };
 
+  const copySSHCommand = () => {    
+    if (server.username && server.ipAddress) {
+      const sshCommand = `ssh ${server.username}@${server.ipAddress}`;
+      navigator.clipboard.writeText(sshCommand)
+        .then(() => {
+          toast.success('SSH command copied!', {
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+            duration: 2000,
+          });
+          setCopiedAppId(null);
+        })
+        .catch(err => {
+          console.error('Failed to copy SSH command:', err);
+          toast.error('Failed to copy SSH command', {
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+          });
+        });
+    }
+  };
+
   const handleEditApp = (app) => {
     setEditingApp(app);
   };
-
   return (
     <div className="bg-gray-800 rounded-lg shadow-md p-5 border border-gray-700" suppressHydrationWarning>
       <div className="flex justify-between items-start mb-4">
@@ -77,9 +105,20 @@ export default function ServerCard({ server }) {
       </div>
       
       <div className="grid grid-cols-1 gap-2 mb-4">
-        <div className="text-sm">
+        <div className="text-sm flex items-center">
           <span className="font-medium text-gray-300">IP: </span>
-          <span className="font-mono text-gray-100">{server.ipAddress}</span>
+          <span className="font-mono text-gray-100">{server.ipAddress}</span>          {server.username && (
+            <button
+              onClick={copySSHCommand}
+              className="ml-2 text-blue-400 hover:text-blue-300 p-1"
+              title="Copy SSH command"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          )}
         </div>
         {server.dns && (
           <div className="text-sm">
@@ -118,11 +157,14 @@ export default function ServerCard({ server }) {
                   {app.description && (
                     <p className="text-sm text-gray-400">{app.description}</p>
                   )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="bg-gray-700 px-2 py-1 rounded font-mono text-sm text-gray-200">
+                </div>                <div className="flex items-center space-x-2">                  <button
+                    onClick={copySSHCommand}
+                    className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded font-mono text-sm text-gray-200 flex items-center"
+                    title="Click to copy SSH command with port forwarding"
+                  >
                     Port: {app.port}
-                  </div>                  <button 
+                  </button>
+                  <button 
                     onClick={() => handleEditApp(app)}
                     className="text-blue-400 hover:text-blue-300 p-1"
                     title="Edit Application"

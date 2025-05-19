@@ -155,6 +155,7 @@ export const appwriteService = {
                     return {
                         id: server.$id,
                         name: server.name,
+                        username: server.username || '',
                         ipAddress: server.ipAddress,
                         dns: server.dns || '',
                         userId: server.userId || '', // Include userId for permission checks
@@ -227,11 +228,13 @@ export const appwriteService = {
     },
 
     updateServer: async (id, serverData) => {
+        debugger;
         try {
             const response = await databases.updateDocument(
                 DATABASE_ID,
                 SERVERS_COLLECTION_ID,
-                id,                {
+                id,
+                {
                     name: serverData.name,
                     ipAddress: serverData.ipAddress,
                     dns: serverData.dns || '',

@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ServerProvider } from "./context/ServerContext";
 import { AuthProvider } from "./context/AuthContext";
 import { Suspense } from 'react'
+import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import "./darkTheme.css";
 
@@ -26,12 +27,17 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900 text-gray-100`}
         suppressHydrationWarning
-      >
-        <AuthProvider>
+      >        <AuthProvider>
           <ServerProvider>
             <Suspense>
               {children}
             </Suspense>
+            <Toaster position="bottom-right" toastOptions={{
+              style: {
+                background: '#333',
+                color: '#fff',
+              },
+            }} />
           </ServerProvider>
         </AuthProvider>
       </body>
