@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-6">
           <Link href="/" className="inline-block">
             <Image
-              src="/file.svg"
+              src="/image.png"
               alt="Server Rack Logo"
               width={48}
               height={48}

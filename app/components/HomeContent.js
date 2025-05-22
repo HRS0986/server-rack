@@ -89,7 +89,7 @@ export default function HomeContent() {
           <div className="text-center py-12">
             <div className="mx-auto h-24 w-24 text-gray-500 mb-4">
               <Image 
-                src="/file.svg" 
+                src="/image.png" 
                 alt="Server Rack illustration" 
                 width={96} 
                 height={96} 

@@ -9,7 +9,7 @@ export default function UnauthorizedPage() {
     <div className="min-h-screen flex flex-col justify-center items-center px-4 bg-gray-900">
       <div className="w-full max-w-md text-center">
         <Image
-          src="/file.svg"
+          src="/image.png"
           alt="Server Rack Logo"
           width={64}
           height={64}

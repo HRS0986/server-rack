@@ -73,6 +73,58 @@ export default function ServerCard({ server }) {    const { deleteServer, isLoad
         });
     }
   };
+  
+  const copyIpAddress = () => {    
+    if (server.ipAddress) {
+      const ipAddress = server.ipAddress;
+      navigator.clipboard.writeText(ipAddress)
+        .then(() => {
+          toast.success('IP address copied!', {
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+            duration: 2000,
+          });
+          setCopiedAppId(null);
+        })
+        .catch(err => {
+          console.error('Failed to copy IP address:', err);
+          toast.error('Failed to copy IP address', {
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+          });
+        });
+    }
+  };
+
+  const copyDNS = () => {
+    if (server.dns) {
+      const dns = server.dns;
+      navigator.clipboard.writeText(dns)
+        .then(() => {
+          toast.success('DNS copied!', {
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+            duration: 2000,
+          });
+          setCopiedAppId(null);
+        })
+        .catch(err => {
+          console.error('Failed to copy DNS:', err);
+          toast.error('Failed to copy DNS', {
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+          });
+        });
+    }
+  };
 
   const handleEditApp = (app) => {
     setEditingApp(app);
@@ -80,25 +132,46 @@ export default function ServerCard({ server }) {    const { deleteServer, isLoad
   return (
     <div className="bg-gray-800 rounded-lg shadow-md p-5 border border-gray-700" suppressHydrationWarning>
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-gray-100">{server.name}</h3>
-        <div className="flex space-x-2">
+        <h3 className="text-lg font-bold text-gray-100">{server.name}</h3>        <div className="flex space-x-2">
+          <Button 
+              variant="secondary" 
+              className="p-1"
+              onClick={copySSHCommand}
+              disabled={isLoading}
+              title="Copy SSH Command"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </Button>
           {canEditServer(server) && (
             <Button 
               variant="secondary" 
-              className="px-2 py-1 text-sm"
+              className="p-1"
               onClick={() => setIsEditingServer(true)}
-              disabled={isLoading}            >
-              Edit
+              disabled={isLoading}
+              title="Edit Server"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
             </Button>
           )}
           {canDeleteServer(server) && (
             <Button 
               variant="danger" 
-              className="px-2 py-1 text-sm"
+              className="p-1"
               onClick={() => setShowConfirmDelete(true)}
               disabled={isLoading}
+              title="Delete Server"
             >
-              Delete
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
             </Button>
           )}
         </div>
@@ -109,7 +182,7 @@ export default function ServerCard({ server }) {    const { deleteServer, isLoad
           <span className="font-medium text-gray-300">IP: </span>
           <span className="font-mono text-gray-100">{server.ipAddress}</span>          {server.username && (
             <button
-              onClick={copySSHCommand}
+              onClick={copyIpAddress}
               className="ml-2 text-blue-400 hover:text-blue-300 p-1"
               title="Copy SSH command"
             >
@@ -124,6 +197,16 @@ export default function ServerCard({ server }) {    const { deleteServer, isLoad
           <div className="text-sm">
             <span className="font-medium text-gray-300">DNS: </span>
             <span className="font-mono text-gray-100">{server.dns}</span>
+            <button
+              onClick={copyDNS}
+              className="ml-2 text-blue-400 hover:text-blue-300 p-1"
+              title="Copy DNS"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
           </div>
         )}
         {server.username && (
@@ -133,14 +216,16 @@ export default function ServerCard({ server }) {    const { deleteServer, isLoad
           </div>
         )}
       </div>
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
+      <div className="mb-4">        <div className="flex items-center justify-between mb-2">
           <h4 className="text-md font-semibold text-gray-200">Applications</h4>          <Button 
-            className="px-3 py-1 text-sm"
+            className="p-1"
             onClick={() => setIsAddingApp(true)}
             disabled={isLoading}
+            title="Add Application"
           >
-            Add App
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14m-7-7h14"></path>
+            </svg>
           </Button>
         </div>
         
@@ -157,7 +242,9 @@ export default function ServerCard({ server }) {    const { deleteServer, isLoad
                   {app.description && (
                     <p className="text-sm text-gray-400">{app.description}</p>
                   )}
-                </div>                <div className="flex items-center space-x-2">                  <button
+                </div>                
+                <div className="flex items-center space-x-2">                  
+                  <button
                     onClick={copySSHCommand}
                     className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded font-mono text-sm text-gray-200 flex items-center"
                     title="Click to copy SSH command with port forwarding"

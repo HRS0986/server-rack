@@ -25,7 +25,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/file.svg" 
+                src="/image.png" 
                 alt="Server Rack Logo" 
                 width={32} 
                 height={32} 
