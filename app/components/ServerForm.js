@@ -2,25 +2,49 @@
 
 import { useState, useEffect } from 'react';
 import { useServerContext } from '../context/ServerContext';
+import { useServerGroupContext } from '../context/ServerGroupContext';
 import Button from './Button';
 import Input from './Input';
+import Modal from './Modal';
+import ServerGroupForm from './ServerGroupForm';
+import toast from 'react-hot-toast';
 
 export default function ServerForm({ onClose }) {
   const { addServer, isLoading } = useServerContext();
+  const { serverGroups, isLoaded: groupsLoaded } = useServerGroupContext();
   const [formData, setFormData] = useState({
     name: '',
     ipAddress: '',
     dns: '',
     username: '',
+    groupId: '',
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [showAddGroupModal, setShowAddGroupModal] = useState(false);
+  const [isGroupsEmpty, setIsGroupsEmpty] = useState(false);
 
   // Prevent hydration issues
   useEffect(() => {
     setIsMounted(true);
   }, []);
+  
+  // Check if there are any server groups
+  useEffect(() => {
+    if (groupsLoaded) {
+      const noGroups = serverGroups.length === 0;
+      setIsGroupsEmpty(noGroups);
+      
+      // If there are no groups, show the add group modal
+      if (noGroups) {
+        setShowAddGroupModal(true);
+      } else if (serverGroups.length > 0) {
+        // Pre-select the first group if available
+        setFormData(prev => ({ ...prev, groupId: serverGroups[0].id }));
+      }
+    }
+  }, [serverGroups, groupsLoaded]);
 
   if (!isMounted) {
     return null;
@@ -40,7 +64,6 @@ export default function ServerForm({ onClose }) {
       setSubmitError('');
     }
   };
-
   const validateForm = () => {
     const newErrors = {};
     
@@ -60,6 +83,10 @@ export default function ServerForm({ onClose }) {
       if (!ipPattern.test(formData.ipAddress)) {
         newErrors.ipAddress = 'Invalid IP address format';
       }
+    }
+    
+    if (!formData.groupId) {
+      newErrors.groupId = 'Server group is required';
     }
     
     setErrors(newErrors);
@@ -124,8 +151,7 @@ export default function ServerForm({ onClose }) {
           placeholder="server.example.com"
           disabled={isLoading}
         />
-        
-        <Input
+          <Input
           label="Username"
           id="username"
           name="username"
@@ -135,6 +161,44 @@ export default function ServerForm({ onClose }) {
           placeholder="admin"
           disabled={isLoading}
         />
+        
+        <div className="space-y-2">
+          <label htmlFor="groupId" className="block text-sm font-medium text-gray-300">
+            Server Group <span className="text-red-500">*</span>
+          </label>
+          <div className="flex space-x-2">
+            <select
+              id="groupId"
+              name="groupId"
+              value={formData.groupId}
+              onChange={handleChange}
+              className={`w-full rounded-md bg-gray-700 text-gray-100 border py-0 px-2 h-[45px] ${
+                errors.groupId ? 'border-red-500' : 'border-gray-600'
+              } focus:border-blue-500 focus:ring-blue-500`}
+              disabled={isLoading || isGroupsEmpty}
+            >
+              <option value="">Select a server group</option>
+              {serverGroups.map(group => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowAddGroupModal(true)}
+              disabled={isLoading}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14m-7-7h14"></path>
+            </svg>
+            </Button>
+          </div>
+          {errors.groupId && (
+            <p className="mt-1 text-sm text-red-500">{errors.groupId}</p>
+          )}
+        </div>
         
         <div className="flex justify-end space-x-3 pt-2">
           <Button 
@@ -146,12 +210,37 @@ export default function ServerForm({ onClose }) {
           </Button>
           <Button 
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isGroupsEmpty}
           >
             {isLoading ? 'Adding...' : 'Add Server'}
           </Button>
         </div>      
       </form>
+      
+      {/* Add Group Modal */}
+      {showAddGroupModal && (
+        <Modal
+          isOpen={showAddGroupModal}
+          onClose={() => {
+            // Only allow closing if there are groups
+            if (!isGroupsEmpty) {
+              setShowAddGroupModal(false);
+            } else {
+              toast.error('You must create a server group first');
+            }
+          }}
+          title="Add New Server Group"
+        >          <ServerGroupForm 
+            onClose={(newGroupId) => {
+              // If a new group was created, select it
+              if (newGroupId) {
+                setFormData(prev => ({ ...prev, groupId: newGroupId }));
+              }
+              setShowAddGroupModal(false);
+            }} 
+          />
+        </Modal>
+      )}
     </div>
   );
 }

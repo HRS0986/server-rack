@@ -11,9 +11,10 @@ const appwriteProjectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID;
 const SERVERS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_SERVERS_COLLECTION_ID;
 const APPLICATIONS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_APPLICATIONS_COLLECTION_ID;
+const SERVER_GROUPS_COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_SERVER_GROUPS_COLLECTION_ID;
 
 // Validate configuration
-if (!appwriteEndpoint || !appwriteProjectId || !DATABASE_ID || !SERVERS_COLLECTION_ID || !APPLICATIONS_COLLECTION_ID) {
+if (!appwriteEndpoint || !appwriteProjectId || !DATABASE_ID || !SERVERS_COLLECTION_ID || !APPLICATIONS_COLLECTION_ID || !SERVER_GROUPS_COLLECTION_ID) {
   console.log('Appwrite configuration is incomplete. Please check your .env.local file.');
   
   if (!appwriteEndpoint) console.log('Missing NEXT_PUBLIC_APPWRITE_ENDPOINT');
@@ -21,6 +22,7 @@ if (!appwriteEndpoint || !appwriteProjectId || !DATABASE_ID || !SERVERS_COLLECTI
   if (!DATABASE_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_DATABASE_ID');
   if (!SERVERS_COLLECTION_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_SERVERS_COLLECTION_ID');
   if (!APPLICATIONS_COLLECTION_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_APPLICATIONS_COLLECTION_ID');
+  if (!SERVER_GROUPS_COLLECTION_ID) console.log('Missing NEXT_PUBLIC_APPWRITE_SERVER_GROUPS_COLLECTION_ID');
 }
 
 // Configure the client
@@ -140,7 +142,8 @@ export const appwriteService = {
             console.log('Error updating password:', error);
             throw error;
         }
-    },    // Server methods
+    },
+    // Server methods
     getServers: async () => {
         try {
             const response = await databases.listDocuments(
@@ -158,6 +161,7 @@ export const appwriteService = {
                         username: server.username || '',
                         ipAddress: server.ipAddress,
                         dns: server.dns || '',
+                        groupId: server.groupId || '', // Include group ID
                         userId: server.userId || '', // Include userId for permission checks
                         applications: apps
                     };
@@ -170,9 +174,7 @@ export const appwriteService = {
             console.log('Error fetching servers:', error);
             return [];
         }
-    },
-
-    getServer: async (id) => {
+    },    getServer: async (id) => {
         try {
             const server = await databases.getDocument(
                 DATABASE_ID,
@@ -188,6 +190,7 @@ export const appwriteService = {
                 ipAddress: server.ipAddress,
                 dns: server.dns || '',
                 username: server.username || '',
+                groupId: server.groupId || '',
                 applications
             };
         } catch (error) {
@@ -207,17 +210,17 @@ export const appwriteService = {
                     name: serverData.name,
                     ipAddress: serverData.ipAddress,
                     dns: serverData.dns || '',
-                    username: serverData.username || ''
-                    // userId field is not defined in the collection schema
+                    username: serverData.username || '',
+                    groupId: serverData.groupId || ''
                 }
             );
-              return {                id: response.$id,
+              return {                
+                id: response.$id,
                 name: response.name,
                 ipAddress: response.ipAddress,
                 dns: response.dns || '',
                 username: response.username || '',
-                // Store userId in state but do not save it in Appwrite
-                // This is a client-side only property
+                groupId: serverData.groupId || '',
                 userId: userId,
                 applications: []
             };
@@ -225,9 +228,7 @@ export const appwriteService = {
             console.log('Error adding server:', error);
             throw error;
         }
-    },
-
-    updateServer: async (id, serverData) => {
+    },    updateServer: async (id, serverData) => {
         debugger;
         try {
             const response = await databases.updateDocument(
@@ -238,15 +239,16 @@ export const appwriteService = {
                     name: serverData.name,
                     ipAddress: serverData.ipAddress,
                     dns: serverData.dns || '',
-                    username: serverData.username || ''
+                    username: serverData.username || '',
+                    groupId: serverData.groupId || ''
                 }
-            );
-              return {
+            );              return {
                 id: response.$id,
                 name: response.name,
                 ipAddress: response.ipAddress,
                 dns: response.dns || '',
-                username: response.username || ''
+                username: response.username || '',
+                groupId: response.groupId || ''
             };
         } catch (error) {
             console.log('Error updating server:', error);
@@ -378,6 +380,217 @@ export const appwriteService = {
     
     isAdmin: (user) => {
         return appwriteService.hasRole(user, 'admin');
+    },
+      // Server Group methods
+    getServerGroups: async () => {
+        try {
+            const response = await databases.listDocuments(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID
+            );
+            
+            return response.documents.map(group => ({
+                id: group.$id,
+                name: group.name,
+                description: group.description || '',
+                variables: group.variables ? JSON.parse(group.variables) : {},
+                serverCount: group.serverCount || 0
+            }));
+        } catch (error) {
+            console.log('Error fetching server groups:', error);
+            return [];
+        }
+    },
+      getServerGroup: async (id) => {
+        try {
+            const group = await databases.getDocument(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID,
+                id
+            );
+            
+            // Fetch servers in this group
+            const servers = await appwriteService.getServersInGroup(id);
+            
+            return {
+                id: group.$id,
+                name: group.name,
+                description: group.description || '',
+                variables: group.variables ? JSON.parse(group.variables) : {},
+                servers: servers,
+                serverCount: servers.length
+            };
+        } catch (error) {
+            console.log('Error fetching server group:', error);
+            throw error;
+        }
+    },
+      addServerGroup: async (groupData) => {
+        try {
+            const currentUser = await appwriteService.getCurrentUser();
+            const userId = currentUser ? currentUser.$id : '';
+            
+            // Convert variables object to JSON string
+            const variablesStr = JSON.stringify(groupData.variables || {});
+            
+            const response = await databases.createDocument(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID,
+                ID.unique(),
+                {
+                    name: groupData.name,
+                    description: groupData.description || '',
+                    variables: variablesStr,
+                    serverCount: 0,
+                }
+            );
+
+            return {
+                id: response.$id,
+                name: response.name,
+                description: response.description || '',
+                variables: groupData.variables || {},  // Return the original object
+                serverCount: 0,
+                userId: userId
+            };
+        } catch (error) {
+            console.log('Error adding server group:', error);
+            throw error;
+        }
+    },
+      updateServerGroup: async (id, groupData) => {
+        try {
+            // Convert variables object to JSON string
+            const variablesStr = JSON.stringify(groupData.variables || {});
+            
+            const response = await databases.updateDocument(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID,
+                id,
+                {
+                    name: groupData.name,
+                    description: groupData.description || '',
+                    variables: variablesStr
+                }
+            );
+            
+            return {
+                id: response.$id,
+                name: response.name,
+                description: response.description || '',
+                variables: groupData.variables || {}, // Return the original object
+                serverCount: response.serverCount || 0
+            };
+        } catch (error) {
+            console.log('Error updating server group:', error);
+            throw error;
+        }
+    },
+    
+    deleteServerGroup: async (id) => {
+        try {
+            // First update any servers in this group to remove the group association
+            const servers = await appwriteService.getServersInGroup(id);
+            
+            for (const server of servers) {
+                await appwriteService.updateServer(server.id, { ...server, groupId: null });
+            }
+            
+            // Then delete the group
+            await databases.deleteDocument(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID,
+                id
+            );
+            
+            return true;
+        } catch (error) {
+            console.log('Error deleting server group:', error);
+            throw error;
+        }
+    },
+    
+    getServersInGroup: async (groupId) => {
+        try {
+            const response = await databases.listDocuments(
+                DATABASE_ID,
+                SERVERS_COLLECTION_ID,
+                [
+                    Query.equal('groupId', groupId)
+                ]
+            );
+            
+            // Fetch applications for each server
+            const serversWithApps = await Promise.all(
+                response.documents.map(async (server) => {
+                    const apps = await appwriteService.getApplicationsByServer(server.$id);
+                    return {
+                        id: server.$id,
+                        name: server.name,
+                        username: server.username || '',
+                        ipAddress: server.ipAddress,
+                        dns: server.dns || '',
+                        groupId: server.groupId,
+                        applications: apps
+                    };
+                })
+            );
+            
+            return serversWithApps;
+        } catch (error) {
+            console.log('Error fetching servers in group:', error);
+            return [];
+        }
+    },
+    
+    addServerToGroup: async (serverId, groupId) => {
+        try {
+            // Update server to add group reference
+            await appwriteService.updateServer(serverId, { groupId });
+            
+            // Get the updated server count for this group
+            const servers = await appwriteService.getServersInGroup(groupId);
+            
+            // Update the group's server count
+            await databases.updateDocument(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID,
+                groupId,
+                {
+                    serverCount: servers.length
+                }
+            );
+            
+            return true;
+        } catch (error) {
+            console.log('Error adding server to group:', error);
+            throw error;
+        }
+    },
+    
+    removeServerFromGroup: async (serverId, groupId) => {
+        try {
+            // Update server to remove group reference
+            await appwriteService.updateServer(serverId, { groupId: null });
+            
+            // Get the updated server count for this group
+            const servers = await appwriteService.getServersInGroup(groupId);
+            
+            // Update the group's server count
+            await databases.updateDocument(
+                DATABASE_ID,
+                SERVER_GROUPS_COLLECTION_ID,
+                groupId,
+                {
+                    serverCount: servers.length
+                }
+            );
+            
+            return true;
+        } catch (error) {
+            console.log('Error removing server from group:', error);
+            throw error;
+        }
     },
     
     // Note: To update user roles, you would need a server-side function 

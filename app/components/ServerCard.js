@@ -10,7 +10,8 @@ import ApplicationEditForm from './ApplicationEditForm';
 import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
 
-export default function ServerCard({ server }) {    const { deleteServer, isLoading, canEditServer, canDeleteServer } = useServerContext();
+export default function ServerCard({ server }) { 
+  const {deleteServer, isLoading, canEditServer, canDeleteServer } = useServerContext();
   const [isAddingApp, setIsAddingApp] = useState(false);
   const [isEditingServer, setIsEditingServer] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
