@@ -166,7 +166,7 @@ export default function ServerEditForm({ server, onClose }) {
               name="groupId"
               value={formData.groupId || ''}
               onChange={handleChange}
-              className={`w-full rounded-md bg-gray-700 text-gray-100 border ${
+              className={`w-full rounded-md bg-gray-700 text-gray-100 border h-[45px] px-2 py-0 ${
                 errors.groupId ? 'border-red-500' : 'border-gray-600'
               } focus:border-blue-500 focus:ring-blue-500`}
               disabled={isLoading || isGroupsEmpty}
@@ -184,7 +184,9 @@ export default function ServerEditForm({ server, onClose }) {
               onClick={() => setShowAddGroupModal(true)}
               disabled={isLoading}
             >
-              Add Group
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14m-7-7h14"></path>
+            </svg>
             </Button>
           </div>
           {errors.groupId && (

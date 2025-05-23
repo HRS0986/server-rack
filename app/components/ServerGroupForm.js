@@ -81,12 +81,12 @@ export default function ServerGroupForm({ onClose, existingGroup = null }) {
     }
     
     try {
-      setIsSubmitting(true);
-        if (existingGroup) {
+      setIsSubmitting(true);      if (existingGroup) {
         // Update existing group
-        await updateServerGroup(existingGroup.id, formData);
+        const updatedGroup = await updateServerGroup(existingGroup.id, formData);
         toast.success('Server group updated successfully');
-        onClose();
+        // Pass the existing group ID back to the parent component
+        onClose(existingGroup.id);
       } else {
         // Add new group
         const newGroup = await addServerGroup(formData);
@@ -215,8 +215,8 @@ export default function ServerGroupForm({ onClose, existingGroup = null }) {
           disabled={isSubmitting}
         >
           {isSubmitting 
-            ? (existingGroup ? 'Updating...' : 'Adding...') 
-            : (existingGroup ? 'Update Group' : 'Add Group')}
+            ? (existingGroup ? 'Saving...' : 'Adding...') 
+            : (existingGroup ? 'Save' : 'Add Group')}
         </Button>
       </div>
     </form>

@@ -59,13 +59,12 @@ export function ServerGroupProvider({ children }) {
       setIsLoading(false);
     }
   };
-
   // Update an existing server group
   const updateServerGroup = async (id, groupData) => {
     try {
       setIsLoading(true);
       setError(null);
-      await appwriteService.updateServerGroup(id, groupData);
+      const updatedGroup = await appwriteService.updateServerGroup(id, groupData);
       setServerGroups(prev => 
         prev.map(group => 
           group.id === id 
@@ -73,6 +72,7 @@ export function ServerGroupProvider({ children }) {
           : group
         )
       );
+      return id; // Return the group ID for consistency with addServerGroup
     } catch (err) {
       console.log('Error updating server group:', err);
       setError('Failed to update server group. Please try again later.');

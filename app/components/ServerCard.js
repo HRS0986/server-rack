@@ -218,7 +218,8 @@ export default function ServerCard({ server }) {
         )}
       </div>
       <div className="mb-4">        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-md font-semibold text-gray-200">Applications</h4>          <Button 
+          <h4 className="text-md font-semibold text-gray-200">Applications</h4>          
+          <Button 
             className="p-1"
             onClick={() => setIsAddingApp(true)}
             disabled={isLoading}
