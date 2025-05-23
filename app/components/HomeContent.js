@@ -21,7 +21,7 @@ export default function HomeContent() {
   const { user, isLoading: authLoading } = useAuth();
   const [isAddingServer, setIsAddingServer] = useState(false);
   const [isAddingServerGroup, setIsAddingServerGroup] = useState(false);
-  const [activeTab, setActiveTab] = useState('servers'); // 'servers' or 'groups'
+  const [activeTab, setActiveTab] = useState('groups'); // 'servers' or 'groups'
   const router = useRouter();
   // For debugging
   useEffect(() => {
@@ -52,16 +52,6 @@ export default function HomeContent() {
             {/* Tabs */}
             <div className="flex border-b border-gray-700 mb-6">
               <button
-                onClick={() => setActiveTab('servers')}
-                className={`px-4 py-2 text-sm font-medium ${
-                  activeTab === 'servers'
-                    ? 'border-b-2 border-blue-500 text-blue-500'
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
-              >
-                Servers
-              </button>
-              <button
                 onClick={() => setActiveTab('groups')}
                 className={`px-4 py-2 text-sm font-medium ${
                   activeTab === 'groups'
@@ -70,6 +60,16 @@ export default function HomeContent() {
                 }`}
               >
                 Server Groups
+              </button>
+              <button
+                onClick={() => setActiveTab('servers')}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'servers'
+                    ? 'border-b-2 border-blue-500 text-blue-500'
+                    : 'text-gray-400 hover:text-gray-300'
+                }`}
+              >
+                Servers
               </button>
             </div>
 
